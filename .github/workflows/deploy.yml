@@ -36,7 +36,10 @@ jobs:
           NODE_ENV: production
 
       - name: List output directory
-        run: ls -la out || echo "out directory not found"
+        run: |
+          pwd
+          ls -la
+          ls -la out || echo "out directory not found"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -44,7 +47,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./out
+          path: out
 
   deploy:
     environment:
