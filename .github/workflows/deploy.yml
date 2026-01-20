@@ -27,35 +27,21 @@ jobs:
           node-version: "20"
           cache: "npm"
 
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+        with:
+          static_site_generator: next
+
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
-        run: |
-          NODE_ENV=production npm run build
-          echo "Build completed. Checking for out directory..."
-          ls -la
-        env:
-          NODE_ENV: production
-
-      - name: List output directory
-        run: |
-          echo "=== Directory contents ==="
-          ls -la
-          echo "=== .next contents ==="
-          ls -la .next || echo "No .next"
-          echo "=== .next/static contents ==="
-          ls -la .next/static || echo "No .next/static"
-          echo "=== out contents ==="
-          ls -la out || echo "No out directory"
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
+      - name: Build with Next.js
+        run: npx next build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ${{ github.workspace }}/out
+          path: ./out
 
   deploy:
     environment:
