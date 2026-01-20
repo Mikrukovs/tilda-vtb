@@ -32,6 +32,11 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: List output directory
+        run: ls -la out || echo "out directory not found"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
