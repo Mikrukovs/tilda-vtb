@@ -962,7 +962,9 @@ export const useEditorStore = create<EditorState>()(
         }
 
         // Короткая ссылка без данных в URL (работает на этом устройстве)
-        return `${typeof window !== 'undefined' ? window.location.origin : ''}/preview?id=${shareId}`;
+        // Определяем basePath из текущего URL (для GitHub Pages)
+        const basePath = typeof window !== 'undefined' && window.location.pathname.startsWith('/pip_builder') ? '/pip_builder' : '';
+        return `${typeof window !== 'undefined' ? window.location.origin : ''}${basePath}/preview?id=${shareId}`;
       },
     }),
     {
