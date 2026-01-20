@@ -40,17 +40,14 @@ jobs:
 
       - name: List output directory
         run: |
-          echo "Current directory:"
-          pwd
-          echo "Directory contents:"
+          echo "=== Directory contents ==="
           ls -la
-          echo "Out directory contents:"
-          if [ -d "out" ]; then
-            ls -la out
-          else
-            echo "ERROR: out directory does not exist!"
-            exit 1
-          fi
+          echo "=== .next contents ==="
+          ls -la .next || echo "No .next"
+          echo "=== .next/static contents ==="
+          ls -la .next/static || echo "No .next/static"
+          echo "=== out contents ==="
+          ls -la out || echo "No out directory"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
