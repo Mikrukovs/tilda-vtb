@@ -5,6 +5,7 @@ import { useEffect, useState, useRef, Suspense, useCallback } from 'react';
 import { Project, Screen } from '@/types';
 import { ComponentRenderer } from '@/components/editor/ComponentRenderer';
 import { useAnalytics } from '@/hooks/useAnalytics';
+import { FormValidationProvider } from '@/contexts/FormValidationContext';
 
 function PreviewContent() {
   const searchParams = useSearchParams();
@@ -192,65 +193,42 @@ function PreviewContent() {
   const hasNavbar = !!navbarSlot?.component;
 
   return (
-    <div 
-      ref={contentRef}
-      className="min-h-screen bg-gray-100 flex justify-center"
-      onClick={handleContentClick}
-    >
-      {/* Навбар - fixed сверху */}
-      {hasNavbar && navbarSlot?.component && (
-        <div 
-          data-zone="navbar"
-          className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[375px] z-40 bg-white shadow-sm"
-        >
-          <ComponentRenderer 
-            config={navbarSlot.component} 
-            preview 
-            onNavigate={handleNavigate}
-            onBack={handleBack}
-            embeddedComponents={embeddedComponents}
-          />
-        </div>
-      )}
-
-      {/* Основной контейнер */}
+    <FormValidationProvider>
       <div 
-        className="relative w-full max-w-[375px] min-h-screen bg-white shadow-lg"
-        style={{
-          paddingTop: hasNavbar ? 56 : 0, // высота навбара
-          paddingBottom: hasStickyContent ? stickyHeight : 0,
-        }}
+        ref={contentRef}
+        className="min-h-screen bg-gray-100 flex justify-center"
+        onClick={handleContentClick}
       >
-        {/* Основной контент - data-zone здесь для точных координат */}
-        <div 
-          data-zone="content"
-          className="px-4 py-6 space-y-4"
-        >
-          {otherSlots.map((slot) => (
-            slot.component && (
-              <div key={slot.id}>
-                <ComponentRenderer 
-                  config={slot.component} 
-                  preview 
-                  onNavigate={handleNavigate}
-                  onBack={handleBack}
-                  embeddedComponents={embeddedComponents}
-                />
-              </div>
-            )
-          ))}
-        </div>
-      </div>
+        {/* Навбар - fixed сверху */}
+        {hasNavbar && navbarSlot?.component && (
+          <div 
+            data-zone="navbar"
+            className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[375px] z-40 bg-white shadow-sm"
+          >
+            <ComponentRenderer 
+              config={navbarSlot.component} 
+              preview 
+              onNavigate={handleNavigate}
+              onBack={handleBack}
+              embeddedComponents={embeddedComponents}
+            />
+          </div>
+        )}
 
-      {/* Sticky секция - fixed внизу */}
-      {hasStickyContent && (
+        {/* Основной контейнер */}
         <div 
-          ref={stickyRef}
-          data-zone="sticky"
-          className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[375px] bg-white border-t border-gray-200 shadow-lg z-30"
+          className="relative w-full max-w-[375px] min-h-screen bg-white shadow-lg"
+          style={{
+            paddingTop: hasNavbar ? 56 : 0, // высота навбара
+            paddingBottom: hasStickyContent ? stickyHeight : 0,
+          }}
         >
-          <div className="px-4 py-3 space-y-2">
-            {currentScreen.stickySlots!.map((slot) => (
+          {/* Основной контент - data-zone здесь для точных координат */}
+          <div 
+            data-zone="content"
+            className="px-4 py-6 space-y-4"
+          >
+            {otherSlots.map((slot) => (
               slot.component && (
                 <div key={slot.id}>
                   <ComponentRenderer 
@@ -265,8 +243,33 @@ function PreviewContent() {
             ))}
           </div>
         </div>
-      )}
-    </div>
+
+        {/* Sticky секция - fixed внизу */}
+        {hasStickyContent && (
+          <div 
+            ref={stickyRef}
+            data-zone="sticky"
+            className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[375px] bg-white border-t border-gray-200 shadow-lg z-30"
+          >
+            <div className="px-4 py-3 space-y-2">
+              {currentScreen.stickySlots!.map((slot) => (
+                slot.component && (
+                  <div key={slot.id}>
+                    <ComponentRenderer 
+                      config={slot.component} 
+                      preview 
+                      onNavigate={handleNavigate}
+                      onBack={handleBack}
+                      embeddedComponents={embeddedComponents}
+                    />
+                  </div>
+                )
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </FormValidationProvider>
   );
 }
 

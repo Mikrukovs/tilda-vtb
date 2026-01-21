@@ -1,7 +1,8 @@
 'use client';
 
 import { InputProps } from '@/types';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useId } from 'react';
+import { useFormValidation } from '@/contexts/FormValidationContext';
 
 interface Props {
   config: InputProps;
@@ -14,6 +15,16 @@ export function Input({ config, preview }: Props) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const inputId = useId();
+  const formValidation = useFormValidation();
+
+  // Регистрация/отмена регистрации инпута в контексте валидации
+  useEffect(() => {
+    if (formValidation && preview) {
+      formValidation.registerInput(inputId, config.validation.enabled);
+      return () => formValidation.unregisterInput(inputId);
+    }
+  }, [formValidation, inputId, config.validation.enabled, preview]);
 
   // Закрытие dropdown при клике вне
   useEffect(() => {
@@ -72,6 +83,13 @@ export function Input({ config, preview }: Props) {
   };
 
   const { isValid, message } = validate();
+
+  // Обновляем состояние валидации в контексте
+  useEffect(() => {
+    if (formValidation && preview && config.validation.enabled) {
+      formValidation.updateValidation(inputId, isValid, touched);
+    }
+  }, [formValidation, inputId, isValid, touched, preview, config.validation.enabled]);
 
   // Определяем вид инпута (для обратной совместимости)
   const variant = config.inputVariant || 'default';

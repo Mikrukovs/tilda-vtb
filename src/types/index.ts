@@ -30,6 +30,8 @@ export interface ButtonProps {
   size: 's' | 'm' | 'l';
   action: 'none' | 'navigate';
   targetScreenId: string | null;
+  // Требовать валидацию всех инпутов на странице перед переходом
+  requireValidation?: boolean;
 }
 
 export interface InputProps {
