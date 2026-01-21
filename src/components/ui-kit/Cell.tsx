@@ -114,9 +114,8 @@ export function Cell({ config, preview, onNavigate }: Props) {
               disabled={!preview}
               className="peer sr-only"
             />
-            <div className="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center transition-colors peer-checked:border-blue-600">
-              <div className="w-3 h-3 rounded-full bg-blue-600 scale-0 transition-transform peer-checked:scale-100" />
-            </div>
+            <div className="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center transition-colors peer-checked:border-blue-600" />
+            <div className="absolute top-1.5 left-1.5 w-3 h-3 rounded-full bg-blue-600 scale-0 transition-transform peer-checked:scale-100" />
           </label>
         );
 
