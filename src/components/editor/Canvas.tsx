@@ -328,8 +328,8 @@ export function Canvas() {
                         e.stopPropagation();
                         removeScreen(screen.id);
                       }}
-                      className="p-0.5 ml-1 rounded hover:bg-gray-200 transition-all overflow-hidden
-                                 w-0 opacity-0 group-hover:w-4 group-hover:opacity-100"
+                      className="p-0.5 rounded hover:bg-gray-200 transition-all overflow-hidden
+                                 w-0 opacity-0 group-hover:w-4 group-hover:ml-1 group-hover:opacity-100"
                     >
                       <svg className="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
