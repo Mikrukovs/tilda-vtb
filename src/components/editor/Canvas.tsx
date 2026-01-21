@@ -292,7 +292,7 @@ export function Canvas() {
             <div
               key={screen.id}
               className={`
-                group flex items-center gap-1 px-3 py-1.5 rounded-lg border transition-colors cursor-pointer whitespace-nowrap
+                group flex items-center px-3 py-1.5 rounded-lg border transition-all cursor-pointer whitespace-nowrap
                 ${currentScreenId === screen.id
                   ? 'border-blue-500 bg-blue-50 text-blue-700'
                   : 'border-gray-200 hover:border-gray-300 text-gray-600'
@@ -328,7 +328,8 @@ export function Canvas() {
                         e.stopPropagation();
                         removeScreen(screen.id);
                       }}
-                      className="p-0.5 rounded opacity-0 group-hover:opacity-100 hover:bg-gray-200 transition-all"
+                      className="p-0.5 ml-1 rounded hover:bg-gray-200 transition-all overflow-hidden
+                                 w-0 opacity-0 group-hover:w-4 group-hover:opacity-100"
                     >
                       <svg className="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
