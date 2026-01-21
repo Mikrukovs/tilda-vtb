@@ -1,32 +1,38 @@
 'use client';
 
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useRef, ReactNode, RefObject } from 'react';
+
+interface InputRegistration {
+  isValid: boolean | null;
+  touched: boolean;
+  hasValidation: boolean;
+  ref: RefObject<HTMLInputElement | HTMLButtonElement | null>;
+  order: number; // Порядок регистрации для сортировки
+}
 
 interface ValidationState {
-  [inputId: string]: {
-    isValid: boolean | null;
-    touched: boolean;
-    hasValidation: boolean; // Включена ли валидация для этого инпута
-  };
+  [inputId: string]: InputRegistration;
 }
 
 interface FormValidationContextType {
   validationState: ValidationState;
-  registerInput: (inputId: string, hasValidation: boolean) => void;
+  registerInput: (inputId: string, hasValidation: boolean, ref: RefObject<HTMLInputElement | HTMLButtonElement | null>) => void;
   unregisterInput: (inputId: string) => void;
   updateValidation: (inputId: string, isValid: boolean | null, touched: boolean) => void;
   isFormValid: () => boolean;
+  focusFirstInvalid: () => boolean; // Возвращает true если нашёл и сфокусировал
 }
 
 const FormValidationContext = createContext<FormValidationContextType | null>(null);
 
 export function FormValidationProvider({ children }: { children: ReactNode }) {
   const [validationState, setValidationState] = useState<ValidationState>({});
+  const orderCounter = useRef(0);
 
-  const registerInput = useCallback((inputId: string, hasValidation: boolean) => {
+  const registerInput = useCallback((inputId: string, hasValidation: boolean, ref: RefObject<HTMLInputElement | HTMLButtonElement | null>) => {
     setValidationState(prev => ({
       ...prev,
-      [inputId]: { isValid: null, touched: false, hasValidation }
+      [inputId]: { isValid: null, touched: false, hasValidation, ref, order: orderCounter.current++ }
     }));
   }, []);
 
@@ -55,6 +61,19 @@ export function FormValidationProvider({ children }: { children: ReactNode }) {
     return inputsWithValidation.every(v => v.touched && v.isValid === true);
   }, [validationState]);
 
+  const focusFirstInvalid = useCallback(() => {
+    // Находим все невалидные инпуты с валидацией
+    const invalidInputs = Object.values(validationState)
+      .filter(v => v.hasValidation && (v.isValid !== true))
+      .sort((a, b) => a.order - b.order);
+    
+    if (invalidInputs.length > 0 && invalidInputs[0].ref.current) {
+      invalidInputs[0].ref.current.focus();
+      return true;
+    }
+    return false;
+  }, [validationState]);
+
   return (
     <FormValidationContext.Provider value={{
       validationState,
@@ -62,6 +81,7 @@ export function FormValidationProvider({ children }: { children: ReactNode }) {
       unregisterInput,
       updateValidation,
       isFormValid,
+      focusFirstInvalid,
     }}>
       {children}
     </FormValidationContext.Provider>

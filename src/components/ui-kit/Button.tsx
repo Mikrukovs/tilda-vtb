@@ -15,12 +15,6 @@ const variantStyles = {
   destructive: 'bg-red-600 text-white hover:bg-red-700 active:bg-red-800',
 };
 
-const disabledStyles = {
-  primary: 'bg-blue-300 text-white cursor-not-allowed',
-  secondary: 'bg-gray-50 text-gray-400 border border-gray-200 cursor-not-allowed',
-  destructive: 'bg-red-300 text-white cursor-not-allowed',
-};
-
 const sizeStyles = {
   s: 'px-3 py-1.5 text-sm',
   m: 'px-4 py-2 text-base',
@@ -29,14 +23,20 @@ const sizeStyles = {
 
 export function Button({ config, preview, onNavigate }: Props) {
   const formValidation = useFormValidation();
-  
-  // Проверяем валидность формы если требуется
-  const isFormValid = formValidation?.isFormValid() ?? true;
-  const isDisabled = config.requireValidation && !isFormValid;
 
   const handleClick = () => {
     if (!preview) return;
-    if (isDisabled) return;
+    
+    // Если требуется валидация — проверяем форму
+    if (config.requireValidation && formValidation) {
+      const isFormValid = formValidation.isFormValid();
+      
+      if (!isFormValid) {
+        // Фокусируемся на первый невалидный инпут
+        formValidation.focusFirstInvalid();
+        return;
+      }
+    }
     
     if (config.action === 'navigate' && config.targetScreenId && onNavigate) {
       onNavigate(config.targetScreenId);
@@ -47,11 +47,10 @@ export function Button({ config, preview, onNavigate }: Props) {
     <button
       type="button"
       onClick={handleClick}
-      disabled={isDisabled}
       className={`
         w-full font-medium rounded-lg transition-colors duration-150 
         focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
-        ${isDisabled ? disabledStyles[config.variant] : variantStyles[config.variant]}
+        ${variantStyles[config.variant]}
         ${sizeStyles[config.size]}
       `}
     >

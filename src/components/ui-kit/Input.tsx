@@ -15,13 +15,14 @@ export function Input({ config, preview }: Props) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement | HTMLButtonElement>(null);
   const inputId = useId();
   const formValidation = useFormValidation();
 
   // Регистрация/отмена регистрации инпута в контексте валидации
   useEffect(() => {
     if (formValidation && preview) {
-      formValidation.registerInput(inputId, config.validation.enabled);
+      formValidation.registerInput(inputId, config.validation.enabled, inputRef);
       return () => formValidation.unregisterInput(inputId);
     }
   }, [formValidation, inputId, config.validation.enabled, preview]);
@@ -206,6 +207,7 @@ export function Input({ config, preview }: Props) {
         {/* Сам инпут или кнопка для dropdown */}
         {variant === 'dropdown' ? (
           <button
+            ref={inputRef as React.RefObject<HTMLButtonElement>}
             type="button"
             onClick={() => preview && setDropdownOpen(!dropdownOpen)}
             className={`${getInputClasses()} w-full text-left bg-white ${!value ? 'text-gray-400' : 'text-gray-900'}`}
@@ -214,6 +216,7 @@ export function Input({ config, preview }: Props) {
           </button>
         ) : (
           <input
+            ref={inputRef as React.RefObject<HTMLInputElement>}
             type={variant === 'password' && !showPassword ? 'password' : 'text'}
             inputMode={config.inputType === 'numeric' ? 'decimal' : 'text'}
             placeholder={config.placeholder}
