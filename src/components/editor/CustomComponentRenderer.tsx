@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   CustomComponentDefinition, 
   TemplateElement, 
   TemplateStyle,
   StateMachineBehavior,
   ActionDefinition,
-  EventType
+  EventType,
+  DropdownItem
 } from '@/types/custom-components';
 
 interface CustomComponentRendererProps {
@@ -25,6 +26,18 @@ interface RenderContext {
   item?: Record<string, unknown>;
 }
 
+interface SheetState {
+  isOpen: boolean;
+  title: string;
+  content: TemplateElement | null;
+}
+
+interface DropdownState {
+  isOpen: boolean;
+  items: DropdownItem[];
+  position: { x: number; y: number };
+}
+
 export function CustomComponentRenderer({ 
   definition, 
   props, 
@@ -38,6 +51,13 @@ export function CustomComponentRenderer({
   const [context, setContext] = useState<Record<string, unknown>>(
     definition.behavior?.type === 'state-machine' ? (definition.behavior.context || {}) : {}
   );
+  
+  // Sheet state
+  const [sheet, setSheet] = useState<SheetState>({ isOpen: false, title: '', content: null });
+  
+  // Dropdown state
+  const [dropdown, setDropdown] = useState<DropdownState>({ isOpen: false, items: [], position: { x: 0, y: 0 } });
+  const dropdownTriggerRef = useRef<HTMLElement | null>(null);
 
   // Execute actions
   const executeActions = useCallback((actions: ActionDefinition[]) => {
@@ -113,6 +133,33 @@ export function CustomComponentRenderer({
               [action.key!]: Math.max(Number(prev[action.key!]) - 1, 0)
             }));
           }
+          break;
+          
+        case 'openSheet':
+          setSheet({
+            isOpen: true,
+            title: action.sheetTitle || '',
+            content: action.sheetContent || null,
+          });
+          break;
+          
+        case 'closeSheet':
+          setSheet({ isOpen: false, title: '', content: null });
+          break;
+          
+        case 'openDropdown':
+          if (action.dropdownItems) {
+            const rect = dropdownTriggerRef.current?.getBoundingClientRect();
+            setDropdown({
+              isOpen: true,
+              items: action.dropdownItems,
+              position: rect ? { x: rect.left, y: rect.bottom + 4 } : { x: 0, y: 0 },
+            });
+          }
+          break;
+          
+        case 'closeDropdown':
+          setDropdown({ isOpen: false, items: [], position: { x: 0, y: 0 } });
           break;
       }
     }
@@ -395,9 +442,91 @@ export function CustomComponentRenderer({
     currentState: machineState,
   };
 
+  // Закрытие dropdown при клике вне
+  useEffect(() => {
+    if (!dropdown.isOpen) return;
+    
+    const handleClickOutside = () => {
+      setDropdown({ isOpen: false, items: [], position: { x: 0, y: 0 } });
+    };
+    
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [dropdown.isOpen]);
+
   return (
-    <div className="custom-component" style={{ width: '100%', maxWidth: '100%' }}>
-      {renderElement(definition.template, renderContext, 'root')}
-    </div>
+    <>
+      <div className="custom-component" style={{ width: '100%', maxWidth: '100%' }}>
+        {renderElement(definition.template, renderContext, 'root')}
+      </div>
+
+      {/* Bottom Sheet */}
+      {sheet.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/50 transition-opacity"
+            onClick={() => setSheet({ isOpen: false, title: '', content: null })}
+          />
+          
+          {/* Sheet */}
+          <div 
+            className="relative w-full max-w-[375px] bg-white rounded-t-2xl shadow-xl animate-slide-up"
+            style={{ maxHeight: '80vh' }}
+          >
+            {/* Handle */}
+            <div className="flex justify-center pt-3 pb-2">
+              <div className="w-10 h-1 bg-gray-300 rounded-full" />
+            </div>
+            
+            {/* Header */}
+            {sheet.title && (
+              <div className="px-4 pb-3 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 text-center">
+                  {sheet.title}
+                </h3>
+              </div>
+            )}
+            
+            {/* Content */}
+            <div className="px-4 py-4 overflow-y-auto" style={{ maxHeight: 'calc(80vh - 100px)' }}>
+              {sheet.content && renderElement(sheet.content, renderContext, 'sheet-content')}
+            </div>
+            
+            {/* Safe area */}
+            <div className="h-6" />
+          </div>
+        </div>
+      )}
+
+      {/* Dropdown */}
+      {dropdown.isOpen && dropdown.items.length > 0 && (
+        <div 
+          className="fixed z-50 bg-white rounded-xl shadow-lg border border-gray-200 py-1 min-w-[180px] animate-fade-in"
+          style={{ 
+            left: Math.min(dropdown.position.x, window.innerWidth - 200),
+            top: dropdown.position.y,
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {dropdown.items.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => {
+                if (item.action) {
+                  executeActions([item.action]);
+                }
+                setDropdown({ isOpen: false, items: [], position: { x: 0, y: 0 } });
+              }}
+              className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 
+                         flex items-center gap-3 transition-colors"
+            >
+              {item.icon && <span className="text-lg">{item.icon}</span>}
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </>
   );
 }

@@ -169,7 +169,7 @@ export type AnimationType =
 export type HapticType = 'light' | 'medium' | 'heavy' | 'success' | 'error' | 'warning';
 
 export interface ActionDefinition {
-  type: 'navigate' | 'animate' | 'haptic' | 'sound' | 'setValue' | 'increment' | 'decrement' | 'addToList' | 'removeFromList' | 'nextItem' | 'prevItem';
+  type: 'navigate' | 'animate' | 'haptic' | 'sound' | 'setValue' | 'increment' | 'decrement' | 'addToList' | 'removeFromList' | 'nextItem' | 'prevItem' | 'openSheet' | 'closeSheet' | 'openDropdown' | 'closeDropdown';
   
   // Для navigate
   screen?: string; // screenId или "prop:fieldName"
@@ -195,6 +195,23 @@ export interface ActionDefinition {
   
   // Для nextItem/prevItem
   listKey?: string;
+  
+  // Для openSheet
+  sheetId?: string; // ID шторки для открытия
+  sheetTitle?: string; // Заголовок шторки
+  sheetContent?: TemplateElement; // Контент шторки (template)
+  
+  // Для openDropdown
+  dropdownId?: string; // ID дропдауна
+  dropdownItems?: DropdownItem[]; // Элементы дропдауна
+}
+
+// Элемент дропдауна
+export interface DropdownItem {
+  id: string;
+  label: string;
+  icon?: string; // Эмодзи или иконка
+  action?: ActionDefinition; // Действие при выборе
 }
 
 export interface ConditionDefinition {

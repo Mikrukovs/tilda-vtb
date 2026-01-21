@@ -505,6 +505,65 @@ Template описывает визуальную структуру. Досту�
 | `removeFromList` | Удалить из списка | `key: "contextKey"`, `index: number` |
 | `nextItem` | Следующий элемент | `key: "currentIndex"`, `listKey: "items"` |
 | `prevItem` | Предыдущий элемент | `key: "currentIndex"`, `listKey: "items"` |
+| `openSheet` | Открыть шторку (bottom sheet) | `sheetTitle`, `sheetContent` |
+| `closeSheet` | Закрыть шторку | — |
+| `openDropdown` | Открыть выпадающее меню | `dropdownItems` |
+| `closeDropdown` | Закрыть меню | — |
+
+### Шторка (Bottom Sheet)
+
+Открывает модальное окно снизу экрана с произвольным контентом.
+
+**Пример:**
+```json
+{
+  "type": "openSheet",
+  "sheetTitle": "Выберите действие",
+  "sheetContent": {
+    "type": "container",
+    "style": { "gap": 8 },
+    "children": [
+      {
+        "type": "button",
+        "prop": "shareLabel",
+        "variant": "secondary"
+      },
+      {
+        "type": "button",
+        "prop": "deleteLabel",
+        "variant": "destructive"
+      }
+    ]
+  }
+}
+```
+
+### Dropdown (Выпадающее меню)
+
+Открывает контекстное меню рядом с элементом.
+
+**Пример:**
+```json
+{
+  "type": "openDropdown",
+  "dropdownItems": [
+    { "id": "edit", "label": "Редактировать", "icon": "✏️" },
+    { "id": "copy", "label": "Копировать", "icon": "📋" },
+    { 
+      "id": "delete", 
+      "label": "Удалить", 
+      "icon": "🗑️",
+      "action": { "type": "navigate", "screen": "confirmDelete" }
+    }
+  ]
+}
+```
+
+**Поля dropdownItems:**
+- `id` (string) — уникальный идентификатор
+- `label` (string) — текст пункта меню
+- `icon` (string, optional) — эмодзи или иконка слева
+- `action` (ActionDefinition, optional) — действие при выборе
 
 ### Доступные условия (Conditions)
 | Условие | Описание |
