@@ -15,14 +15,14 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
-    "@prisma/client": "^6.19.2",
+    "@prisma/client": "5.22.0",
     "bcrypt": "^6.0.0",
     "dom-to-image-more": "^3.7.2",
     "html2canvas": "^1.4.1",
     "jsonwebtoken": "^9.0.3",
     "modern-screenshot": "^4.6.7",
     "next": "16.1.1",
-    "prisma": "^6.19.2",
+    "prisma": "5.22.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "uuid": "^13.0.0",
