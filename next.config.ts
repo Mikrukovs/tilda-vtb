@@ -34,6 +34,20 @@ const nextConfig: NextConfig = {
     }
     return config;
   },
+  // Headers для Content Security Policy - разрешаем Telegram iframe
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors 'self' https://oauth.telegram.org",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
