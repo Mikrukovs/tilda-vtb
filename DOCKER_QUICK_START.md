@@ -8,7 +8,7 @@
 docker-compose up
 ```
 
-Откройте http://localhost:3000
+Откройте http://localhost:8888
 
 ### 2. Production (с nginx)
 

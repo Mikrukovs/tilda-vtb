@@ -49,7 +49,7 @@ npm install
 npm run dev
 ```
 
-Откройте [http://localhost:3000](http://localhost:3000) в браузере.
+Откройте [http://localhost:3000](http://localhost:3000) в браузере (или [http://localhost:8888](http://localhost:8888) в Docker).
 
 ## 📚 Документация
 
