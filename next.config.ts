@@ -1,14 +1,8 @@
 import type { NextConfig } from "next";
 
-const isProd = process.env.NODE_ENV === 'production';
-
 const nextConfig: NextConfig = {
-  output: 'export',
-  basePath: isProd ? '/pip_builder' : '',
-  assetPrefix: isProd ? '/pip_builder/' : '',
-  trailingSlash: true,
+  // Убрали static export для поддержки API routes и SSR
   images: {
-    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
@@ -19,6 +13,12 @@ const nextConfig: NextConfig = {
         hostname: 'api.telegram.org',
       },
     ],
+  },
+  // Experimental features для App Router
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
   },
 };
 

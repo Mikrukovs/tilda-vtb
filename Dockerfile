@@ -1,14 +1,21 @@
-# Multi-stage build для Next.js приложения
+# Multi-stage build для Next.js приложения с SSR
 
 # Stage 1: Dependencies
 FROM node:20-alpine AS deps
 WORKDIR /app
 
+# Установка зависимостей для native модулей
+RUN apk add --no-cache libc6-compat openssl
+
 # Копируем package файлы
 COPY package*.json ./
+COPY prisma ./prisma/
 
 # Устанавливаем зависимости
 RUN npm ci
+
+# Генерируем Prisma Client
+RUN npx prisma generate
 
 # Stage 2: Builder
 FROM node:20-alpine AS builder
@@ -21,23 +28,37 @@ COPY . .
 # Переменные окружения для build time
 ARG NEXT_PUBLIC_TELEGRAM_BOT_NAME
 ENV NEXT_PUBLIC_TELEGRAM_BOT_NAME=$NEXT_PUBLIC_TELEGRAM_BOT_NAME
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # Собираем приложение
 RUN npm run build
 
-# Stage 3: Production с nginx
-FROM nginx:alpine AS production
-WORKDIR /usr/share/nginx/html
+# Stage 3: Production Runner
+FROM node:20-alpine AS runner
+WORKDIR /app
 
-# Удаляем дефолтные файлы nginx
-RUN rm -rf ./*
+# Установка зависимостей для runtime
+RUN apk add --no-cache openssl
 
-# Копируем собранное приложение
-COPY --from=builder /app/out .
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Копируем nginx конфиг
-COPY nginx.conf /etc/nginx/nginx.conf
+# Создаем пользователя для безопасности
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
 
-EXPOSE 80
+# Копируем необходимые файлы
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
-CMD ["nginx", "-g", "daemon off;"]
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node", "server.js"]

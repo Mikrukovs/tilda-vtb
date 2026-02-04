@@ -1,0 +1,97 @@
+// Prisma schema для Prototype Builder
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Пользователи (из Telegram)
+model User {
+  id            Int      @id @default(autoincrement())
+  telegramId    BigInt   @unique @map("telegram_id")
+  username      String?  @db.VarChar(255)
+  firstName     String   @map("first_name") @db.VarChar(255)
+  lastName      String?  @map("last_name") @db.VarChar(255)
+  photoUrl      String?  @map("photo_url") @db.Text
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Связи
+  folders          Folder[]
+  projectAccess    ProjectCollaborator[]
+  projectHistory   ProjectHistory[]
+
+  @@map("users")
+}
+
+// Папки для организации проектов
+model Folder {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  ownerId   Int      @map("owner_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Связи
+  owner    User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  projects Project[]
+
+  @@index([ownerId])
+  @@map("folders")
+}
+
+// Проекты (прототипы)
+model Project {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  folderId  Int?     @map("folder_id")
+  data      Json     // Структура проекта (screens, slots, components)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Связи
+  folder         Folder?               @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  collaborators  ProjectCollaborator[]
+  history        ProjectHistory[]
+
+  @@index([folderId])
+  @@map("projects")
+}
+
+// Доступ к проектам (collaborative editing)
+model ProjectCollaborator {
+  id        Int      @id @default(autoincrement())
+  projectId Int      @map("project_id")
+  userId    Int      @map("user_id")
+  role      String   @default("editor") @db.VarChar(50) // owner, editor, viewer
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Связи
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@index([projectId])
+  @@index([userId])
+  @@map("project_collaborators")
+}
+
+// История изменений проектов (для undo/redo)
+model ProjectHistory {
+  id        Int      @id @default(autoincrement())
+  projectId Int      @map("project_id")
+  userId    Int?     @map("user_id")
+  data      Json     // Snapshot состояния проекта
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Связи
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([projectId])
+  @@map("project_history")
+}

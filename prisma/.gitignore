@@ -1,0 +1,3 @@
+# Prisma migrations can be committed, but generated files should not
+*.db
+*.db-journal
