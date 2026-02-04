@@ -42,7 +42,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "frame-ancestors 'self' https://oauth.telegram.org",
+            value: "frame-src 'self' https://oauth.telegram.org https://telegram.org; frame-ancestors 'self'",
           },
         ],
       },
