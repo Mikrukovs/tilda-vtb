@@ -9,6 +9,7 @@ export type TemplateElementType =
   | 'image' 
   | 'button' 
   | 'input' 
+  | 'cell'
   | 'spacer'
   | 'list'
   | 'stack'
@@ -78,12 +79,40 @@ export interface TemplateElement {
   
   // Для button
   variant?: 'primary' | 'secondary' | 'destructive';
-  size?: 's' | 'm' | 'l';
-  action?: 'navigate';
+  size?: 's' | 'm' | 'l' | number; // Для button: 's'|'m'|'l', для icon: число в пикселях
+  action?: 'navigate' | 'none' | 'back';
   target?: string; // "prop:targetScreen" или screenId
+  requireValidation?: boolean;
   
   // Для input
   placeholder?: string;
+  label?: string;
+  showLabel?: boolean;
+  inputVariant?: 'default' | 'search' | 'dropdown' | 'password';
+  inputType?: 'text' | 'numeric';
+  descriptor?: string;
+  dropdownOptions?: { id: string; label: string }[];
+  validation?: {
+    enabled: boolean;
+    type: 'exact' | 'range';
+    exactValue?: string;
+    min?: number | null;
+    max?: number | null;
+    errorMessage?: string;
+    successMessage?: string;
+  };
+  
+  // Для cell
+  cellType?: 'basic' | 'navigation' | 'toggle' | 'checkbox' | 'radio' | 'info' | 'icon';
+  title?: string; // или prop
+  subtitle?: string;
+  showSubtitle?: boolean;
+  subtitlePosition?: 'top' | 'bottom';
+  showIcon?: boolean;
+  icon?: string; // base64/URL или "prop:iconKey"
+  rightIcon?: string;
+  infoValue?: string;
+  radioGroup?: string;
   
   // Для spacer
   height?: number;
@@ -94,8 +123,8 @@ export interface TemplateElement {
   itemTemplate?: TemplateElement;
   
   // Для icon
-  name?: string;
-  rotation?: string; // "context:isOpen ? 180 : 0"
+  name?: string; // Название иконки: more, close, chevron-down, check и др.
+  rotation?: string; // Поворот: число или "context:ключ"
   
   // Интерактивность
   gestures?: ('TAP' | 'LONG_PRESS' | 'SWIPE_LEFT' | 'SWIPE_RIGHT' | 'SWIPE_UP' | 'SWIPE_DOWN')[];
@@ -169,7 +198,7 @@ export type AnimationType =
 export type HapticType = 'light' | 'medium' | 'heavy' | 'success' | 'error' | 'warning';
 
 export interface ActionDefinition {
-  type: 'navigate' | 'animate' | 'haptic' | 'sound' | 'setValue' | 'increment' | 'decrement' | 'addToList' | 'removeFromList' | 'nextItem' | 'prevItem';
+  type: 'navigate' | 'animate' | 'haptic' | 'sound' | 'setValue' | 'increment' | 'decrement' | 'addToList' | 'removeFromList' | 'nextItem' | 'prevItem' | 'openSheet' | 'closeSheet' | 'openDropdown' | 'closeDropdown';
   
   // Для navigate
   screen?: string; // screenId или "prop:fieldName"
@@ -195,6 +224,23 @@ export interface ActionDefinition {
   
   // Для nextItem/prevItem
   listKey?: string;
+  
+  // Для openSheet
+  sheetId?: string; // ID шторки для открытия
+  sheetTitle?: string; // Заголовок шторки
+  sheetContent?: TemplateElement; // Контент шторки (template)
+  
+  // Для openDropdown
+  dropdownId?: string; // ID дропдауна
+  dropdownItems?: DropdownItem[]; // Элементы дропдауна
+}
+
+// Элемент дропдауна
+export interface DropdownItem {
+  id: string;
+  label: string;
+  icon?: string; // Эмодзи или иконка
+  action?: ActionDefinition; // Действие при выборе
 }
 
 export interface ConditionDefinition {

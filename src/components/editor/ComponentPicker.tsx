@@ -133,12 +133,7 @@ export function ComponentPicker({ onSelect, onClose }: Props) {
                            hover:border-purple-500 hover:bg-purple-50 transition-all duration-150"
               >
                 <div className="text-2xl">{component.icon || '📦'}</div>
-                <div className="text-left">
-                  <div className="font-medium text-gray-900">{component.displayName}</div>
-                  {component.description && (
-                    <div className="text-xs text-gray-500 truncate">{component.description}</div>
-                  )}
-                </div>
+                <span className="font-medium text-gray-900">{component.displayName}</span>
               </button>
             ))}
           </div>

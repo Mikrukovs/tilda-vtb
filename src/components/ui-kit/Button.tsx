@@ -1,6 +1,7 @@
 'use client';
 
 import { ButtonProps } from '@/types';
+import { useFormValidation } from '@/contexts/FormValidationContext';
 
 interface Props {
   config: ButtonProps;
@@ -21,8 +22,23 @@ const sizeStyles = {
 };
 
 export function Button({ config, preview, onNavigate }: Props) {
+  const formValidation = useFormValidation();
+
   const handleClick = () => {
-    if (preview && config.action === 'navigate' && config.targetScreenId && onNavigate) {
+    if (!preview) return;
+    
+    // Если требуется валидация — проверяем форму
+    if (config.requireValidation && formValidation) {
+      const isFormValid = formValidation.isFormValid();
+      
+      if (!isFormValid) {
+        // Фокусируемся на первый невалидный инпут
+        formValidation.focusFirstInvalid();
+        return;
+      }
+    }
+    
+    if (config.action === 'navigate' && config.targetScreenId && onNavigate) {
       onNavigate(config.targetScreenId);
     }
   };
