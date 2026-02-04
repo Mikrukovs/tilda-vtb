@@ -7,12 +7,12 @@ WORKDIR /app
 # Установка зависимостей для native модулей (включая python и компиляторы для bcrypt)
 RUN apk add --no-cache libc6-compat openssl python3 make g++
 
-# Копируем package файлы
+# Копируем package файлы и схему Prisma
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Устанавливаем зависимости
-RUN npm ci
+# Устанавливаем зависимости БЕЗ postinstall
+RUN npm ci --ignore-scripts
 
 # Генерируем Prisma Client
 RUN npx prisma generate
