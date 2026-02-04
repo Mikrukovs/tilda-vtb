@@ -19,13 +19,8 @@ RUN npm ci
 # Копируем остальные файлы проекта
 COPY . .
 
-# Копируем entrypoint script
-COPY docker-entrypoint-dev.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint-dev.sh
-
 # Открываем порт
 EXPOSE 3000
 
-# Используем entrypoint
-ENTRYPOINT ["docker-entrypoint-dev.sh"]
-CMD ["npm", "run", "dev"]
+# Запускаем npm install при старте, затем dev server
+CMD ["sh", "-c", "echo '=== Installing dependencies ===' && npm install && echo '=== Starting dev server ===' && npm run dev"]
