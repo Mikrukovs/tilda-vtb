@@ -15,7 +15,7 @@ docker-compose --profile development up
 docker-compose up -d
 ```
 
-Приложение будет доступно на `http://localhost:3000`
+Приложение будет доступно на `http://localhost:8888`
 
 ### Production режим
 
