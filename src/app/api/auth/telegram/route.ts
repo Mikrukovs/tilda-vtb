@@ -39,10 +39,12 @@ export async function POST(request: NextRequest) {
     // Создаем или обновляем пользователя в БД
     const telegramId = BigInt(body.id);
     
+    // Генерируем username из Telegram username или создаём из telegramId
+    const username = body.username || `tg_${body.id}`;
+    
     const user = await prisma.user.upsert({
       where: { telegramId },
       update: {
-        username: body.username || null,
         firstName: body.first_name,
         lastName: body.last_name || null,
         photoUrl: body.photo_url || null,
@@ -50,7 +52,8 @@ export async function POST(request: NextRequest) {
       },
       create: {
         telegramId,
-        username: body.username || null,
+        username,
+        password: null, // Telegram пользователи не имеют пароля
         firstName: body.first_name,
         lastName: body.last_name || null,
         photoUrl: body.photo_url || null,
@@ -66,11 +69,13 @@ export async function POST(request: NextRequest) {
       token,
       user: {
         id: user.id,
-        telegramId: user.telegramId.toString(),
+        telegramId: user.telegramId?.toString() || null,
         username: user.username,
         firstName: user.firstName,
         lastName: user.lastName,
         photoUrl: user.photoUrl,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
       },
     });
   } catch (error) {
