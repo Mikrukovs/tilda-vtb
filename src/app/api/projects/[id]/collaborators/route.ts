@@ -5,7 +5,7 @@ import { requireAuth } from '@/lib/auth';
 // GET /api/projects/:id/collaborators - Список участников
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
   try {
     const auth = await requireAuth(request.headers.get('authorization'));
@@ -13,6 +13,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const params = await props.params;
     const projectId = parseInt(params.id);
     if (isNaN(projectId)) {
       return NextResponse.json({ error: 'Invalid project ID' }, { status: 400 });
@@ -58,7 +59,7 @@ export async function GET(
 // POST /api/projects/:id/collaborators - Добавить участника
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
   try {
     const auth = await requireAuth(request.headers.get('authorization'));
@@ -66,6 +67,7 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const params = await props.params;
     const projectId = parseInt(params.id);
     if (isNaN(projectId)) {
       return NextResponse.json({ error: 'Invalid project ID' }, { status: 400 });

@@ -5,7 +5,7 @@ import { requireAuth } from '@/lib/auth';
 // GET /api/folders/:id - Получить папку
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
   try {
     const auth = await requireAuth(request.headers.get('authorization'));
@@ -13,6 +13,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const params = await props.params;
     const folderId = parseInt(params.id);
     if (isNaN(folderId)) {
       return NextResponse.json({ error: 'Invalid folder ID' }, { status: 400 });
@@ -47,7 +48,7 @@ export async function GET(
 // PUT /api/folders/:id - Обновить папку
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
   try {
     const auth = await requireAuth(request.headers.get('authorization'));
@@ -55,6 +56,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const params = await props.params;
     const folderId = parseInt(params.id);
     if (isNaN(folderId)) {
       return NextResponse.json({ error: 'Invalid folder ID' }, { status: 400 });
@@ -100,7 +102,7 @@ export async function PUT(
 // DELETE /api/folders/:id - Удалить папку
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
   try {
     const auth = await requireAuth(request.headers.get('authorization'));
@@ -108,6 +110,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const params = await props.params;
     const folderId = parseInt(params.id);
     if (isNaN(folderId)) {
       return NextResponse.json({ error: 'Invalid folder ID' }, { status: 400 });

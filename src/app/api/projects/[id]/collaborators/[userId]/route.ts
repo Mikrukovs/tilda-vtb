@@ -5,7 +5,7 @@ import { requireAuth } from '@/lib/auth';
 // DELETE /api/projects/:id/collaborators/:userId - Удалить участника
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string; userId: string } }
+  props: { params: Promise<{ id: string; userId: string }> }
 ) {
   try {
     const auth = await requireAuth(request.headers.get('authorization'));
@@ -13,6 +13,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const params = await props.params;
     const projectId = parseInt(params.id);
     const userId = parseInt(params.userId);
 
