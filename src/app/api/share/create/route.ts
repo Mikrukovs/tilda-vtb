@@ -43,9 +43,14 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Определяем базовый URL из заголовков запроса
+    const host = request.headers.get('host') || 'localhost:3000';
+    const protocol = request.headers.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
+    const baseUrl = `${protocol}://${host}`;
+
     return NextResponse.json({
       shareId: sharedProject.id,
-      shareUrl: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/preview?id=${sharedProject.id}`,
+      shareUrl: `${baseUrl}/preview?id=${sharedProject.id}`,
     });
   } catch (error) {
     console.error('Create share link error:', error);

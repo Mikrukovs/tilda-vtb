@@ -55,26 +55,29 @@ function PreviewContent() {
       return;
     }
 
-    try {
-      // Пробуем загрузить из localStorage по ID
-      const sharedProjects = JSON.parse(localStorage.getItem('shared-projects') || '{}');
-      const sharedData = sharedProjects[shareId];
-      
-      if (!sharedData?.project) {
-        // Проект не найден - показываем загрузку файла
+    // Загружаем проект с сервера по shareId
+    const loadFromServer = async () => {
+      try {
+        const response = await fetch(`/api/share/${shareId}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to load shared project');
+        }
+        
+        const { project: loadedProject } = await response.json();
+        setProject(loadedProject);
+        
+        // Устанавливаем первую страницу как текущую
+        if (loadedProject.screens && loadedProject.screens.length > 0) {
+          setCurrentScreenId(loadedProject.screens[0].id);
+        }
+      } catch (error) {
+        console.error('Load shared project error:', error);
         setShowUpload(true);
-        return;
       }
-      
-      setProject(sharedData.project);
-      
-      // Устанавливаем первую страницу как текущую
-      if (sharedData.project.screens && sharedData.project.screens.length > 0) {
-        setCurrentScreenId(sharedData.project.screens[0].id);
-      }
-    } catch {
-      setShowUpload(true);
-    }
+    };
+
+    loadFromServer();
   }, [searchParams]);
 
   // Загрузка проекта из файла
