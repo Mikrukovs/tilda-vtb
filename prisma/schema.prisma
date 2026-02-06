@@ -64,6 +64,7 @@ model Project {
   folder         Folder?               @relation(fields: [folderId], references: [id], onDelete: SetNull)
   collaborators  ProjectCollaborator[]
   history        ProjectHistory[]
+  sharedLinks    SharedProject[]
 
   @@index([folderId])
   @@map("projects")
@@ -101,4 +102,19 @@ model ProjectHistory {
 
   @@index([projectId])
   @@map("project_history")
+}
+
+// Публичные ссылки на проекты (для preview)
+model SharedProject {
+  id        String   @id @default(cuid())
+  projectId Int?     @map("project_id")
+  data      Json     // Snapshot проекта
+  createdAt DateTime @default(now()) @map("created_at")
+  expiresAt DateTime? @map("expires_at")
+  
+  // Связи
+  project Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([projectId])
+  @@map("shared_projects")
 }

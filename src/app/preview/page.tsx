@@ -29,7 +29,26 @@ function PreviewContent() {
   // Загрузка проекта
   useEffect(() => {
     const shareId = searchParams.get('id');
+    const encodedData = searchParams.get('data');
     
+    // Сначала пробуем загрузить из URL параметра
+    if (encodedData) {
+      try {
+        const decoded = decodeURIComponent(atob(encodedData));
+        const loadedProject = JSON.parse(decoded) as Project;
+        setProject(loadedProject);
+        
+        if (loadedProject.screens && loadedProject.screens.length > 0) {
+          setCurrentScreenId(loadedProject.screens[0].id);
+        }
+        return;
+      } catch (error) {
+        console.error('Failed to decode project data:', error);
+        // Продолжаем пробовать другие способы
+      }
+    }
+    
+    // Если нет data параметра, пробуем загрузить по ID
     if (!shareId) {
       // Нет ID - показываем загрузку файла
       setShowUpload(true);
@@ -132,7 +151,7 @@ function PreviewContent() {
           </div>
           <h1 className="text-xl font-semibold text-gray-900 mb-2">Загрузить прототип</h1>
           <p className="text-gray-600 mb-6">
-            Прототип не найден на этом устройстве. Загрузите файл проекта.
+            Прототип не найден. Загрузите файл проекта или используйте ссылку для шаринга из редактора.
           </p>
           
           <input

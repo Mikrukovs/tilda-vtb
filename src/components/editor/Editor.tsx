@@ -108,21 +108,36 @@ export function Editor({ projectId }: EditorProps) {
     };
   };
 
-  const getShareableLink = () => {
-    if (projectId) {
-      // Если это сохранённый проект - возвращаем ссылку на него
-      return `${window.location.origin}/editor/${projectId}`;
-    }
-    
-    // Для локального проекта - возвращаем ссылку на preview
-    return `${window.location.origin}/preview`;
-  };
+  const handleShare = async () => {
+    try {
+      setSaving(true);
+      
+      // Создаём публичную ссылку через API
+      const response = await fetch('/api/share/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          projectId: projectId || null,
+          data: project,
+        }),
+      });
 
-  const handleShare = () => {
-    const link = getShareableLink();
-    setShareLink(link);
-    setShowShareModal(true);
-    setCopied(false);
+      if (!response.ok) {
+        throw new Error('Failed to create share link');
+      }
+
+      const { shareUrl } = await response.json();
+      setShareLink(shareUrl);
+      setShowShareModal(true);
+      setCopied(false);
+    } catch (error) {
+      console.error('Share error:', error);
+      alert('Ошибка создания публичной ссылки');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleCopy = async () => {
