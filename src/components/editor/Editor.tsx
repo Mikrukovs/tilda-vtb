@@ -27,6 +27,7 @@ export function Editor({ projectId }: EditorProps) {
     updateComponent,
     removeComponentFromSlot,
     getCurrentScreen,
+    createProject,
   } = useEditorStore();
 
   const [shareLink, setShareLink] = useState('');
