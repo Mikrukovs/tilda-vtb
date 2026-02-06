@@ -1,6 +1,16 @@
 -- Делаем telegramId опциональным
 ALTER TABLE "users" ALTER COLUMN "telegram_id" DROP NOT NULL;
 
+-- Заполняем username для пользователей, у которых его нет (генерируем из telegram_id)
+UPDATE "users" 
+SET "username" = 'tg_' || "telegram_id"::text 
+WHERE "username" IS NULL AND "telegram_id" IS NOT NULL;
+
+-- Для пользователей без telegram_id и без username (если такие есть)
+UPDATE "users" 
+SET "username" = 'user_' || "id"::text 
+WHERE "username" IS NULL;
+
 -- Делаем username обязательным и уникальным
 ALTER TABLE "users" ALTER COLUMN "username" SET NOT NULL;
 

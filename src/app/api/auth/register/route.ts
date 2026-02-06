@@ -5,10 +5,14 @@ import bcrypt from 'bcrypt';
 
 export async function POST(request: NextRequest) {
   try {
-    const { username, password, firstName, lastName } = await request.json();
+    const body = await request.json();
+    console.log('Register request body:', body);
+    
+    const { username, password, firstName, lastName } = body;
 
     // Валидация
     if (!username || !password || !firstName) {
+      console.log('Validation failed:', { username, password: !!password, firstName });
       return NextResponse.json(
         { error: 'Username, password and firstName are required' },
         { status: 400 }

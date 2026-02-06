@@ -30,6 +30,8 @@ export function LoginForm() {
         ? formData
         : { username: formData.username, password: formData.password };
 
+      console.log('Sending request to:', endpoint, body);
+
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -37,6 +39,7 @@ export function LoginForm() {
       });
 
       const data = await response.json();
+      console.log('Response:', response.status, data);
 
       if (!response.ok) {
         setError(data.error || 'Произошла ошибка');
