@@ -13,6 +13,7 @@ function PreviewContent() {
   const [currentScreenId, setCurrentScreenId] = useState<string | null>(null);
   const [showUpload, setShowUpload] = useState(false);
   const [navigationHistory, setNavigationHistory] = useState<string[]>([]);
+  const [shareId, setShareId] = useState<string | null>(null);
   
   // Хуки для sticky секции - должны быть до любых условных return
   const stickyRef = useRef<HTMLDivElement>(null);
@@ -20,16 +21,21 @@ function PreviewContent() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // Аналитика
+  // Аналитика - используем shareId для отслеживания
   const { trackClick, trackScreenChange } = useAnalytics({
-    projectId: project?.id || '',
-    enabled: !!project,
+    projectId: shareId || '',
+    enabled: !!shareId,
   });
 
   // Загрузка проекта
   useEffect(() => {
-    const shareId = searchParams.get('id');
+    const shareIdFromUrl = searchParams.get('id');
     const encodedData = searchParams.get('data');
+    
+    // Сохраняем shareId для аналитики
+    if (shareIdFromUrl) {
+      setShareId(shareIdFromUrl);
+    }
     
     // Сначала пробуем загрузить из URL параметра
     if (encodedData) {
@@ -49,7 +55,7 @@ function PreviewContent() {
     }
     
     // Если нет data параметра, пробуем загрузить по ID
-    if (!shareId) {
+    if (!shareIdFromUrl) {
       // Нет ID - показываем загрузку файла
       setShowUpload(true);
       return;
@@ -58,7 +64,7 @@ function PreviewContent() {
     // Загружаем проект с сервера по shareId
     const loadFromServer = async () => {
       try {
-        const response = await fetch(`/api/share/${shareId}`);
+        const response = await fetch(`/api/share/${shareIdFromUrl}`);
         
         if (!response.ok) {
           throw new Error('Failed to load shared project');
