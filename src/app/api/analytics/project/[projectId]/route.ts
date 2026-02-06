@@ -16,9 +16,9 @@ export async function GET(
     const params = await props.params;
     const projectId = params.projectId;
 
-    // Проверяем доступ к проекту (если это числовой ID)
+    // Проверяем доступ к проекту только если это числовой ID (проект в БД)
     const numericProjectId = parseInt(projectId);
-    if (!isNaN(numericProjectId)) {
+    if (!isNaN(numericProjectId) && auth) {
       const access = await prisma.projectCollaborator.findFirst({
         where: {
           projectId: numericProjectId,
@@ -30,6 +30,7 @@ export async function GET(
         return NextResponse.json({ error: 'Access denied' }, { status: 403 });
       }
     }
+    // Если projectId это shareId (строка), доступ проверять не нужно
 
     // Получаем все сессии для проекта
     const sessions = await prisma.analyticsSession.findMany({
