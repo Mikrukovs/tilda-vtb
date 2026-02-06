@@ -10,26 +10,14 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { isAuthenticated, token } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
 
   useEffect(() => {
-    // Проверяем авторизацию
-    if (!isAuthenticated || !token) {
-      router.push('/login');
-      return;
+    // Если не авторизован - редирект на главную (там создастся анонимный юзер)
+    if (!isAuthenticated) {
+      router.push('/');
     }
-
-    // Проверяем валидность токена
-    fetch('/api/auth/me', {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    }).then((res) => {
-      if (!res.ok) {
-        router.push('/login');
-      }
-    });
-  }, [isAuthenticated, token, router]);
+  }, [isAuthenticated, router]);
 
   if (!isAuthenticated) {
     return (
@@ -39,5 +27,25 @@ export default function DashboardLayout({
     );
   }
 
-  return <>{children}</>;
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header с именем пользователя */}
+      <header className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <h1 className="text-xl font-bold text-gray-900">Prototype Builder</h1>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+              {user?.firstName?.charAt(0) || '?'}
+            </div>
+            <span className="text-sm font-medium text-gray-700">
+              {user?.firstName || 'Анонимный пользователь'}
+            </span>
+          </div>
+        </div>
+      </header>
+      
+      {/* Основной контент */}
+      <main>{children}</main>
+    </div>
+  );
 }
