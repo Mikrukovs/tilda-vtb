@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
+import { generateAnonymousUser } from '@/utils/anonymous';
 
 export default function DashboardLayout({
   children,
@@ -10,14 +11,15 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, setAuth } = useAuthStore();
 
   useEffect(() => {
-    // Если не авторизован - редирект на главную (там создастся анонимный юзер)
+    // Автоматически создаём анонимного пользователя при первом заходе
     if (!isAuthenticated) {
-      router.push('/');
+      const anonymousUser = generateAnonymousUser();
+      setAuth(anonymousUser, 'anonymous-token');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, setAuth]);
 
   if (!isAuthenticated) {
     return (
